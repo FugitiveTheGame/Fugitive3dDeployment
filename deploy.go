@@ -155,30 +155,35 @@ func runFileCopy(config ssh.ClientConfig, host string, localfile string, remotef
 }
 
 // Run a single command on a remote system over SSH. STDOUT is returned in a string.
-func runSSHCmd(config ssh.ClientConfig, host string, command string) string {
-
+func runSSHCmd(config ssh.ClientConfig, host string, command string) (string, error) {
+	var output string
+	var err error
 	target := fmt.Sprintf("%s:22", host)
 	client, err := ssh.Dial("tcp", target, &config)
+	
 	if err != nil {
-		log.Fatal("Failed to dial: ", err)
+		fmt.Printf("Failed to dial: %s", err)
+		return output, err
 	}
-
+	
 	// Each client connection can support multiple interactive sessions,
 	// represented by a Session.
 	session, err := client.NewSession()
 	if err != nil {
-		log.Fatal("Failed to create session: ", err)
+		fmt.Printf("Failed to create session:: %s", err)
+		return output, err
 	}
 	defer session.Close()
 
 	var b bytes.Buffer
 	session.Stdout = &b
 	if err := session.Run(command); err != nil {
-		log.Fatal("Failed to run: " + err.Error())
+		fmt.Printf("Failed to run command '%s': %s", command, err)
+		return output, err
 	}
-	var result = b.String()
+	output = b.String()
 
-	return result
+	return output, err
 }
 
 func AddFileToZip(zipWriter *zip.Writer, filename string) error {
@@ -309,14 +314,11 @@ func isDropletUp(config ssh.ClientConfig, host string) bool {
 	// at this point, we need to poll to see if we can run userland commands
 	// so we can start copying stuff over
 	fmt.Println("Attempting to see if the droplet is reachable...")
-	for {
-		response := runSSHCmd(config, host, "uptime")
-		if response != "" {
-			return true
-		}
-		time.Sleep(5 * time.Second)
-		fmt.Println("Still trying...")
+	_, err := runSSHCmd(config, host, "uptime")
+	if err != nil {
+		return false
 	}
+	return true
 }
 
 func main() {
@@ -369,20 +371,29 @@ func main() {
 			fmt.Println("timeout reached when provisioning droplet and/or zipping docker context.")
 		}
 	}
-	var reachable bool
-	for i := 0; i < 10; i++ {
-		status := isDropletUp(sshConfig, publicIP)
-		if status {
+
+	reachable := false
+	retryCount := 12
+	retryInterval := 10 * time.Second
+	fmt.Println("Attempting to see if the droplet is reachable...")
+	for i := 0; i < retryCount; i++ {
+		response, err := runSSHCmd(sshConfig, publicIP, "uptime")
+		if err != nil {
+			reachable = false
+			time.Sleep(retryInterval)
+			fmt.Println("Still trying...")
+		} else {
+			fmt.Printf("Server uptime: %s", response)
 			reachable = true
 			break
-		}
-		fmt.Println("Still trying to reach the droplet via ssh...")
+		}	
 	}
+
 	if reachable {
 		remotefile := fmt.Sprintf("/root/%s", deployConfig.ZipFileName)
 		runFileCopy(sshConfig, publicIP, zipFile, remotefile)
 	} else {
-		log.Fatal("IDK, wtf!?!")
+		log.Fatal("Droplet wasn't reachable after %d attempts.", retryCount)
 	}
 
 	// oh god....where are we...what is the meaning of this all?
@@ -400,7 +411,7 @@ func main() {
 
 	for _, cmd := range prepCommands {
 		fmt.Printf("Executing remote command: '%s'", cmd)
-		output := runSSHCmd(sshConfig, publicIP, cmd)
+		output, _ := runSSHCmd(sshConfig, publicIP, cmd)
 		fmt.Println(output)
 	}
 
