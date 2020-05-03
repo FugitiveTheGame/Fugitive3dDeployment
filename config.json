@@ -1,0 +1,15 @@
+{
+	"_comment": "This is an overall local user config file for fugitive server deployment.",
+    "droplet": {
+    	"name": "fugitive-droplet",
+        "sizeslug": "s-4vcpu-8gb",
+        "imageslug": "docker-18-04",
+        "region": "sfo2",
+        "tag": "automated",
+        "sshkeyid": 123456
+    },
+    "remoteusername": "root",
+    "sshprivatekey": "/Users/batman/.ssh/id_rsa_digitalocean",
+    "dockercontext": "/Users/batman/dev/Fugitive3D/extras/deploy/container",
+    "zipfilename": "fugitive-docker-ctx.zip"
+}
