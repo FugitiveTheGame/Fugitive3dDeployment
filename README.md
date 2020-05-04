@@ -21,7 +21,7 @@ The first thing to edit is the config file. (almost) All your user settings are 
 	"_comment": "This is an overall local user config file for fugitive server deployment.",
     "droplet": {
     	"name": "fugitive-droplet",
-        "sizeslug": "s-4vcpu-8gb",
+        "sizeslug": "s-3vcpu-1gb",
         "imageslug": "docker-18-04",
         "region": "sfo2",
         "tag": "automated",
@@ -29,8 +29,10 @@ The first thing to edit is the config file. (almost) All your user settings are 
     },
     "remoteusername": "root",
     "sshprivatekey": "/Users/batman/.ssh/id_rsa_digitalocean",
-    "dockercontext": "/Users/batman/dev/Fugitive3D/extras/deploy/container",
-    "zipfilename": "fugitive-docker-ctx.zip"
+    "f3d_repo_root": "/Users/batman/dev/Fugitive3D",
+    "zipfilename": "fugitive-crap.zip",
+    "godot_linux_server_url": "https://downloads.tuxfamily.org/godotengine/3.2.1/Godot_v3.2.1-stable_linux_server.64.zip",
+    "godot_binary_path": "/Applications/Godot.app/Contents/MacOS/Godot"
 }
 ``` 
 
@@ -52,9 +54,11 @@ This section allows settings for the droplet being provisioned.
 The settings at the root level here describe some details of your local workspace.
 
 * remoteusername - This is the user account on the droplet. Use the root default for now.
-* sshprivatekey - This is an absolute path to your ssh _private key file_ on your local filesystem. This is the private key corresponding with the public one you uploaded to DO already.
-* dockercontext - This is the absolute path to the Fugitive3D repository `extras/deploy/container` directory on your local filesystem.
+* sshprivatekey - This is an absolute path to your ssh _private key file_ on your local filesystem. This is the private key corresponding with the public one you uploaded to DO already. It cannot be protected with a passphrase to be used with this script.
+* f3d_repo_root - This is the absolute path to the Fugitive3D repository on your local filesystem.
 * zipfilename - This is just a temporary name so you can leave it default. This deploy script will create this file wherever it is run. The file can be safely deleted locally after you spin up a droplet.
+* godot_linux_server_url - This is a URL the droplet is going to download the linux godot server binary from.
+* godot_binary_path - This is the absolute path on your local filesystem to godot. Used for building on the CLI.
 
 **Environment Variables**
 

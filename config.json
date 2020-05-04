@@ -2,7 +2,7 @@
 	"_comment": "This is an overall local user config file for fugitive server deployment.",
     "droplet": {
     	"name": "fugitive-droplet",
-        "sizeslug": "s-4vcpu-8gb",
+        "sizeslug": "s-3vcpu-1gb",
         "imageslug": "docker-18-04",
         "region": "sfo2",
         "tag": "automated",
@@ -10,6 +10,8 @@
     },
     "remoteusername": "root",
     "sshprivatekey": "/Users/batman/.ssh/id_rsa_digitalocean",
-    "dockercontext": "/Users/batman/dev/Fugitive3D/extras/deploy/container",
-    "zipfilename": "fugitive-docker-ctx.zip"
+    "f3d_repo_root": "/Users/batman/dev/Fugitive3D",
+    "zipfilename": "fugitive-crap.zip",
+    "godot_linux_server_url": "https://downloads.tuxfamily.org/godotengine/3.2.1/Godot_v3.2.1-stable_linux_server.64.zip",
+    "godot_binary_path": "/Applications/Godot.app/Contents/MacOS/Godot"
 }
